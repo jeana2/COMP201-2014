@@ -1,9 +1,12 @@
 #include <iostream>
+#include <cstdlib>
 #include <ctime>
 
 using namespace std;
 
 enum State { FIRST, MATCH, NO_MATCH };
+
+// To clear the screen, look up ANSI escape codes
 // Concentration game model
 // The model manages the state of the game
 class Model {
@@ -58,6 +61,10 @@ public:
         model = new Model(8,8);
         view = new View;
     }
+    ~Controller() {
+        delete model;
+        delete view;
+    }
     // Event loop
     void loop();
 private:
@@ -72,17 +79,43 @@ Model::Model(int w, int h) {
     lastRow = -1;
     lastColumn = -1;
     state = FIRST;
-    grid = new char*[h];
-    visible = new char*[h];
+    // Two dimensional array
+    grid = new char*[height];
+    visible = new char*[height];
+    // For every row, create the array for that row
     for (int i = 0; i < height; i++) {
-        grid[i] = new char[w];
-        visible[i] = new char[w];
+        grid[i] = new char[width];
+        visible[i] = new char[width];
     }
-    // TODO: make this random-ish
+    char letter = 'A';
+    // Guarantee pairs of characters in the grid
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            grid[i][j] = 'a';
-            visible[i][j] = '*';
+            grid[i][j] = letter;
+            // Everything's invisible at first
+            visible[i][j] = letter;
+            // Every other iteration...
+            if (j % 2 == 1) {
+                letter++;
+                if (letter > 'Z') {
+                    letter = 'A';
+                }
+            }
+        }
+    }
+    // Seed random number generator with time
+    srand(time(0));
+    // Randomize
+    int otheri, otherj;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            // Pick a random spot in the grid
+            otheri = rand() % height;
+            otherj = rand() % width;
+            // Swap grid[i][j] with grid[otheri][otherj]
+            letter = visible[i][j];
+            visible[i][j] = visible[otheri][otherj];
+            visible[otheri][otherj] = letter;
         }
     }
 }
@@ -109,14 +142,8 @@ void Model::flip(int row, int column) {
     // If the row and column are not valid, break out and don't do anything
     if (!valid(row, column)) { return; }
     
-    // If the last selected row and column are invalid,
-        // It means we're selecting the first "cell" to flip
-    // Otherwise, we are selecting the next "cell" to flip
-        // If the last cell and the current cell match, great!
-        // Otherwise, make the last cell invisible (set it to *)
-    // Make the current cell visible
 }
-// If everything is visible, then it's game over
+// TODO: If everything is visible, then it's game over
 bool Model::gameOver() {
     // Hint: assume the game is over, unless it isn't
     // Hint: Loop through the grid and see if any element is not visible
@@ -159,6 +186,7 @@ void Controller::loop() {
         cin >> col;
         model->flip(row, col);
     }
+    cout << "Hooray, you win!" << endl;
 }
 
 int main() {
