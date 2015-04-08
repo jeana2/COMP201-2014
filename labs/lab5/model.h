@@ -6,8 +6,8 @@
 enum Direction { UP, DOWN, LEFT, RIGHT, DEAD };
 
 typedef struct {
-    unsigned int x;
-    unsigned int y;
+    int x;
+    int y;
 } Coordinate;
 
 // The model manages the state of the game
@@ -24,9 +24,12 @@ public:
     // Is the game over?
     bool gameOver();
     // Did we just collide with food?
-    bool eating();
+    bool eating() {
+        return false;
+    }
     // Quit the game
-    void end();
+    void end() {
+    }
     // TODO: swap this out with your own list implementation
     // The snake
     std::list<Coordinate> snake;
